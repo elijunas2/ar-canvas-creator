@@ -3,17 +3,19 @@
 build:
   # Specify this is a Node.js project
   runtime: nodejs
+  # Node.js version
+  version: "18"
   # Build command
   command: npm ci && npm run build
-  # Output directory
+  # Output directory where built files are located
   output: dist
   # Environment variables
   environment:
-    NODE_VERSION: "18"
+    NODE_ENV: production
 
 # Deployment settings
 deploy:
-  # Where to copy built files
+  # Where to copy built files (Hostinger's web root)
   destination: public_html
   # Files to exclude from deployment
   exclude:
@@ -25,4 +27,16 @@ deploy:
     - package-lock.json
     - vite.config.ts
     - tsconfig.json
+    - tsconfig.app.json
+    - tsconfig.node.json
     - README.md
+    - .hostinger.yml
+    - postcss.config.js
+    - tailwind.config.ts
+    - components.json
+    - eslint.config.js
+
+# Project type specification
+project:
+  type: nodejs
+  framework: react
