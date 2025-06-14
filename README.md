@@ -51,35 +51,58 @@ npm run dev
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
-## Deploy to Hostinger
+## Deploy to Hostinger - UPDATED INSTRUCTIONS
 
-### 1. Build projekto lokaliai (jei turi Node.js)
+### Automatinis deployment su GitHub integration
 
-```bash
-npm install
-npm run build
-```
+1. **Hostinger GitHub integracija:**
+   - Hostinger valdymo skydelyje eikite į **Git Deployment**
+   - Pasirinkite savo GitHub repository
+   - **Branch:** `main`
+   - **Build Command:** `npm ci && npm run build`
+   - **Output Directory:** `dist`
+   - **Install Path:** palikite tuščią (deploy'ins į `/public_html`)
 
-Tai sukurs `/dist` aplanką su HTML + JS + CSS svetaine.
+2. **Jei automatinis deployment neveikia:**
+   
+   **Variantas A - Manual build ir upload:**
+   ```bash
+   # Lokaliai
+   npm install
+   npm run build
+   
+   # Upload visus failus iš 'dist' aplanko į Hostinger public_html
+   ```
 
-### 2. Sukurk naują šaką (pvz. deploy) arba naują GitHub repo
+   **Variantas B - Separate deployment branch:**
+   ```bash
+   # Sukurti deploy branch
+   git checkout --orphan deploy
+   git rm -rf .
+   
+   # Build projektas main branch'e ir nukopijuoti
+   git checkout main
+   npm run build
+   cp -r dist/* ../temp-deploy/
+   
+   # Grįžti į deploy branch ir commit
+   git checkout deploy
+   cp -r ../temp-deploy/* ./
+   git add .
+   git commit -m "Deploy build"
+   git push -f origin deploy
+   
+   # Hostinger nustatymuose nurodyti 'deploy' branch
+   ```
 
-Kad nereiktų maišyti su šaltinio kodu, gali laikyti atskirai.
+3. **Svarbu - Node.js versija:**
+   - Hostinger valdymo skydelyje įsitikinkite, kad **Node.js versija** yra bent 16 arba naujesnė
+   - Eikite į **Advanced → Node.js Selector** ir pasirinkite Node.js 18 ar naujesnę
 
-```bash
-git checkout --orphan deploy
-rm -rf *
-cp -r dist/* ./
-git add .
-git commit -m "Static build for Hostinger"
-git push -u origin deploy
-```
-
-### 3. Hostinger'e:
-
-- Vietoj `main` šakos nurodyti `deploy`
-- **Install path:** palik tuščią (tada deploys į `/public_html`)
-- Spausti „Deploy"
+4. **Troubleshooting:**
+   - Jei deployment ieško PHP failų (`composer.json`), tai reiškia, kad Hostinger neteisingai identifikavo projekto tipą
+   - Įsitikinkite, kad projekto šaknies kataloge yra `.hostinger.yml` failas
+   - Patikrinkite, kad **Git Deployment** nustatymuose pasirinktas teisingas repository ir branch
 
 ## What technologies are used for this project?
 
@@ -94,9 +117,9 @@ This project is built with:
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/8dcab3b8-4bb7-4571-96f1-e6c60beb3a41) and click on Share -> Publish.
+Simply open [Lovable](https://lovable.dev/projects/8dcab3b8-4bb7-4571-96f1-e6c60beb3a41) and click on Share → Publish.
 
-For Hostinger deployment, follow the steps above in the "Deploy to Hostinger" section.
+For Hostinger deployment, follow the updated steps above in the "Deploy to Hostinger" section.
 
 ## Can I connect a custom domain to my Lovable project?
 

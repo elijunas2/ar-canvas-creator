@@ -1,0 +1,28 @@
+
+# Hostinger deployment configuration
+build:
+  # Specify this is a Node.js project
+  runtime: nodejs
+  # Build command
+  command: npm ci && npm run build
+  # Output directory
+  output: dist
+  # Environment variables
+  environment:
+    NODE_VERSION: "18"
+
+# Deployment settings
+deploy:
+  # Where to copy built files
+  destination: public_html
+  # Files to exclude from deployment
+  exclude:
+    - node_modules
+    - src
+    - .git
+    - .gitignore
+    - package.json
+    - package-lock.json
+    - vite.config.ts
+    - tsconfig.json
+    - README.md
