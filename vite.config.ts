@@ -17,11 +17,16 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: undefined,
+        entryFileNames: 'assets/[name].[hash].js',
+        chunkFileNames: 'assets/[name].[hash].js',
+        assetFileNames: 'assets/[name].[hash].[ext]'
       },
     },
     sourcemap: false,
     minify: mode === 'production' ? 'terser' : false,
     chunkSizeWarningLimit: 1000,
+    target: 'es2015',
+    cssCodeSplit: true,
   },
   plugins: [
     react(),

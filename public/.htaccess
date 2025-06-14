@@ -5,17 +5,20 @@ RewriteEngine On
 # RewriteCond %{HTTPS} off
 # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
+# Set correct MIME types FIRST - very important for Hostinger
+AddType application/javascript .js
+AddType application/javascript .mjs
+AddType text/css .css
+AddType text/html .html
+AddType application/json .json
+AddType image/svg+xml .svg
+
 # Handle client-side routing for React SPA
 RewriteBase /
 RewriteRule ^index\.html$ - [L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule . /index.html [L]
-
-# Set correct MIME types
-AddType application/javascript .js
-AddType text/css .css
-AddType text/html .html
 
 # Enable GZIP compression
 <IfModule mod_deflate.c>
@@ -54,6 +57,11 @@ AddType text/html .html
     Header always set Permissions-Policy "camera=(), microphone=()"
 </IfModule>
 
-# Additional MIME types
+# Additional MIME types for AR
 AddType video/mp4 .mp4
 AddType application/octet-stream .mind
+
+# Force correct content type for JS modules
+<FilesMatch "\.(js|mjs)$">
+    Header set Content-Type "application/javascript"
+</FilesMatch>
