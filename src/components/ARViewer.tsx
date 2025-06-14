@@ -1,6 +1,13 @@
 
 import React, { useEffect, useRef } from 'react';
 
+// Extend Window interface to include AFRAME
+declare global {
+  interface Window {
+    AFRAME: any;
+  }
+}
+
 const ARViewer = () => {
   const sceneRef = useRef<HTMLDivElement>(null);
 
@@ -27,6 +34,11 @@ const ARViewer = () => {
         await new Promise((resolve) => {
           mindarScript.onload = resolve;
         });
+      }
+
+      // Register the play-on-click component after A-Frame loads
+      if (window.AFRAME && !window.AFRAME.components['play-on-click']) {
+        window.AFRAME.registerComponent('play-on-click', playOnClickComponent);
       }
     };
 
@@ -125,14 +137,5 @@ const playOnClickComponent = {
     });
   }
 };
-
-// Register the component when A-Frame is loaded
-if (typeof window !== 'undefined') {
-  window.addEventListener('load', () => {
-    if (window.AFRAME) {
-      window.AFRAME.registerComponent('play-on-click', playOnClickComponent);
-    }
-  });
-}
 
 export default ARViewer;
