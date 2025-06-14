@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
-  base: "./",
+  base: "/",
   build: {
     outDir: "dist",
     assetsDir: "assets",
@@ -19,8 +19,7 @@ export default defineConfig(({ mode }) => ({
         manualChunks: undefined,
       },
     },
-    // Optimizacija Hostinger deploy'ui
-    sourcemap: mode === 'development',
+    sourcemap: false,
     minify: mode === 'production' ? 'terser' : false,
     chunkSizeWarningLimit: 1000,
   },
@@ -34,6 +33,5 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  // Užtikrinti teisingą static asset'ų handling'ą
   publicDir: 'public',
 }));
