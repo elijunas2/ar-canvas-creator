@@ -20,8 +20,8 @@ export default defineConfig(({ mode }) => ({
       },
     },
     // Optimizacija Hostinger deploy'ui
-    sourcemap: false,
-    minify: 'terser',
+    sourcemap: mode === 'development',
+    minify: mode === 'production' ? 'terser' : false,
     chunkSizeWarningLimit: 1000,
   },
   plugins: [
