@@ -19,6 +19,10 @@ export default defineConfig(({ mode }) => ({
         manualChunks: undefined,
       },
     },
+    // Optimizacija Hostinger deploy'ui
+    sourcemap: false,
+    minify: 'terser',
+    chunkSizeWarningLimit: 1000,
   },
   plugins: [
     react(),
@@ -30,4 +34,6 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Užtikrinti teisingą static asset'ų handling'ą
+  publicDir: 'public',
 }));

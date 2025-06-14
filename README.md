@@ -1,3 +1,4 @@
+
 # Welcome to your Lovable project
 
 ## Project info
@@ -50,6 +51,36 @@ npm run dev
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
+## Deploy to Hostinger
+
+### 1. Build projekto lokaliai (jei turi Node.js)
+
+```bash
+npm install
+npm run build
+```
+
+Tai sukurs `/dist` aplanką su HTML + JS + CSS svetaine.
+
+### 2. Sukurk naują šaką (pvz. deploy) arba naują GitHub repo
+
+Kad nereiktų maišyti su šaltinio kodu, gali laikyti atskirai.
+
+```bash
+git checkout --orphan deploy
+rm -rf *
+cp -r dist/* ./
+git add .
+git commit -m "Static build for Hostinger"
+git push -u origin deploy
+```
+
+### 3. Hostinger'e:
+
+- Vietoj `main` šakos nurodyti `deploy`
+- **Install path:** palik tuščią (tada deploys į `/public_html`)
+- Spausti „Deploy"
+
 ## What technologies are used for this project?
 
 This project is built with:
@@ -59,10 +90,13 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+- MindAR.js for AR functionality
 
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/8dcab3b8-4bb7-4571-96f1-e6c60beb3a41) and click on Share -> Publish.
+
+For Hostinger deployment, follow the steps above in the "Deploy to Hostinger" section.
 
 ## Can I connect a custom domain to my Lovable project?
 
