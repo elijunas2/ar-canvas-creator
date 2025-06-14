@@ -18,21 +18,29 @@ const ARViewer = () => {
   const sceneRef = useRef<HTMLDivElement>(null);
   const [missingFiles, setMissingFiles] = useState<string[]>([]);
   const [checked, setChecked] = useState(false);
+  const [scriptsLoaded, setScriptsLoaded] = useState(false);
 
   useEffect(() => {
+    console.log('ARViewer component mounted');
+    
     // Check if the required files exist
     const checkFiles = async () => {
+      console.log('Checking for required files...');
       const results = await Promise.all(
         TEST_FILES.map(async (file) => {
           try {
             const res = await fetch(`./${file.src}`, {method: "HEAD"});
+            console.log(`File ${file.src}: ${res.ok ? 'EXISTS' : 'MISSING'}`);
             return res.ok ? null : file.label;
-          } catch {
+          } catch (error) {
+            console.log(`File ${file.src}: ERROR -`, error);
             return file.label;
           }
         })
       );
-      setMissingFiles(results.filter(Boolean) as string[]);
+      const missing = results.filter(Boolean) as string[];
+      console.log('Missing files:', missing);
+      setMissingFiles(missing);
       setChecked(true);
     };
 
@@ -42,32 +50,54 @@ const ARViewer = () => {
   useEffect(() => {
     // Load required scripts dynamically
     const loadScripts = async () => {
+      console.log('Loading AR scripts...');
+      
       // Load A-Frame
       if (!document.querySelector('script[src*="aframe"]')) {
+        console.log('Loading A-Frame...');
         const aframeScript = document.createElement('script');
         aframeScript.src = 'https://aframe.io/releases/1.4.0/aframe.min.js';
         document.head.appendChild(aframeScript);
 
         await new Promise((resolve) => {
-          aframeScript.onload = resolve;
+          aframeScript.onload = () => {
+            console.log('A-Frame loaded successfully');
+            resolve(undefined);
+          };
+          aframeScript.onerror = (error) => {
+            console.error('Failed to load A-Frame:', error);
+            resolve(undefined);
+          };
         });
       }
 
       // Load MindAR
       if (!document.querySelector('script[src*="mindar"]')) {
+        console.log('Loading MindAR...');
         const mindarScript = document.createElement('script');
         mindarScript.src = 'https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js';
         document.head.appendChild(mindarScript);
 
         await new Promise((resolve) => {
-          mindarScript.onload = resolve;
+          mindarScript.onload = () => {
+            console.log('MindAR loaded successfully');
+            resolve(undefined);
+          };
+          mindarScript.onerror = (error) => {
+            console.error('Failed to load MindAR:', error);
+            resolve(undefined);
+          };
         });
       }
 
       // Register the play-on-click component after A-Frame loads
       if (window.AFRAME && !window.AFRAME.components['play-on-click']) {
+        console.log('Registering play-on-click component...');
         window.AFRAME.registerComponent('play-on-click', playOnClickComponent);
       }
+      
+      setScriptsLoaded(true);
+      console.log('All AR scripts loaded');
     };
 
     if (checked && missingFiles.length === 0) {
@@ -76,6 +106,7 @@ const ARViewer = () => {
   }, [checked, missingFiles]);
 
   if (!checked) {
+    console.log('Still checking files...');
     return (
       <div className="w-full h-screen flex justify-center items-center bg-black text-white">
         <div className="text-lg">Tikrinama projekto aplinkos failus...</div>
@@ -84,6 +115,7 @@ const ARViewer = () => {
   }
 
   if (missingFiles.length > 0) {
+    console.log('Missing files detected, showing warning');
     return (
       <div className="w-full h-screen flex justify-center items-center bg-yellow-50">
         <div className="max-w-md bg-white rounded-lg shadow-lg p-8 border border-yellow-300 text-center">
@@ -101,19 +133,41 @@ const ARViewer = () => {
             <br />
             Po to – perkraukite (deploy) aplikaciją.
           </p>
-          <a
-            href="https://hiukim.github.io/mind-ar-js-doc/tools/compile"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block bg-yellow-100 border border-yellow-500 text-yellow-800 px-3 py-1 rounded hover:bg-yellow-200 transition"
-          >
-            MindAR .mind generatorius
-          </a>
+          <div className="space-y-2">
+            <a
+              href="https://hiukim.github.io/mind-ar-js-doc/tools/compile"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-yellow-100 border border-yellow-500 text-yellow-800 px-3 py-1 rounded hover:bg-yellow-200 transition"
+            >
+              MindAR .mind generatorius
+            </a>
+            <br />
+            <button 
+              onClick={() => window.history.back()}
+              className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+            >
+              Grįžti atgal
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
+  if (!scriptsLoaded) {
+    console.log('Scripts still loading...');
+    return (
+      <div className="w-full h-screen flex justify-center items-center bg-black text-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white mx-auto mb-4"></div>
+          <div className="text-lg">Kraunami AR komponentai...</div>
+        </div>
+      </div>
+    );
+  }
+
+  console.log('Rendering AR scene');
   return (
     <div className="w-full h-screen bg-black relative">
       <div 
@@ -187,6 +241,12 @@ const ARViewer = () => {
         <div className="text-center">
           <p className="text-lg mb-2">Camera Access Required</p>
           <p className="text-sm">Please allow camera permissions and refresh the page</p>
+          <button 
+            onClick={() => window.history.back()}
+            className="mt-4 bg-white text-red-900 px-4 py-2 rounded hover:bg-gray-100"
+          >
+            Grįžti atgal
+          </button>
         </div>
       </div>
     </div>

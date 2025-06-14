@@ -1,11 +1,26 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import ARViewer from '@/components/ARViewer';
 import ARInstructions from '@/components/ARInstructions';
 
 const Index = () => {
   const [showAR, setShowAR] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string[]>([]);
+
+  useEffect(() => {
+    console.log('Index component mounted');
+    const info = [
+      `URL: ${window.location.href}`,
+      `User Agent: ${navigator.userAgent}`,
+      `Screen: ${window.screen.width}x${window.screen.height}`,
+      `Viewport: ${window.innerWidth}x${window.innerHeight}`,
+      `Base URL: ${import.meta.env.BASE_URL || 'undefined'}`,
+      `Mode: ${import.meta.env.MODE}`,
+    ];
+    setDebugInfo(info);
+    console.log('Debug info:', info);
+  }, []);
 
   if (showAR) {
     return <ARViewer />;
@@ -22,7 +37,10 @@ const Index = () => {
             Web-based AR experience using MindAR.js
           </p>
           <Button 
-            onClick={() => setShowAR(true)}
+            onClick={() => {
+              console.log('Launch AR clicked');
+              setShowAR(true);
+            }}
             size="lg"
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
           >
@@ -31,6 +49,18 @@ const Index = () => {
         </div>
         
         <ARInstructions />
+        
+        {/* Debug informacija development režime */}
+        {import.meta.env.DEV && (
+          <div className="mt-8 bg-white bg-opacity-20 rounded-lg p-4">
+            <h3 className="text-lg font-semibold mb-2 text-white">Debug Info:</h3>
+            <ul className="text-sm text-white opacity-75">
+              {debugInfo.map((info, index) => (
+                <li key={index} className="mb-1">{info}</li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );
