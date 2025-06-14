@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 // Extend Window interface to include AFRAME
 declare global {
@@ -8,8 +8,36 @@ declare global {
   }
 }
 
+const TEST_FILES = [
+  {src: "test.png", label: "test.png (target image)"},
+  {src: "test.mp4", label: "test.mp4 (video)"},
+  {src: "test.mind", label: "test.mind (image target file)"}
+];
+
 const ARViewer = () => {
   const sceneRef = useRef<HTMLDivElement>(null);
+  const [missingFiles, setMissingFiles] = useState<string[]>([]);
+  const [checked, setChecked] = useState(false);
+
+  useEffect(() => {
+    // Check if the required files exist
+    const checkFiles = async () => {
+      const results = await Promise.all(
+        TEST_FILES.map(async (file) => {
+          try {
+            const res = await fetch(`./${file.src}`, {method: "HEAD"});
+            return res.ok ? null : file.label;
+          } catch {
+            return file.label;
+          }
+        })
+      );
+      setMissingFiles(results.filter(Boolean) as string[]);
+      setChecked(true);
+    };
+
+    checkFiles();
+  }, []);
 
   useEffect(() => {
     // Load required scripts dynamically
@@ -19,7 +47,7 @@ const ARViewer = () => {
         const aframeScript = document.createElement('script');
         aframeScript.src = 'https://aframe.io/releases/1.4.0/aframe.min.js';
         document.head.appendChild(aframeScript);
-        
+
         await new Promise((resolve) => {
           aframeScript.onload = resolve;
         });
@@ -30,7 +58,7 @@ const ARViewer = () => {
         const mindarScript = document.createElement('script');
         mindarScript.src = 'https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js';
         document.head.appendChild(mindarScript);
-        
+
         await new Promise((resolve) => {
           mindarScript.onload = resolve;
         });
@@ -42,8 +70,49 @@ const ARViewer = () => {
       }
     };
 
-    loadScripts();
-  }, []);
+    if (checked && missingFiles.length === 0) {
+      loadScripts();
+    }
+  }, [checked, missingFiles]);
+
+  if (!checked) {
+    return (
+      <div className="w-full h-screen flex justify-center items-center bg-black text-white">
+        <div className="text-lg">Tikrinama projekto aplinkos failus...</div>
+      </div>
+    );
+  }
+
+  if (missingFiles.length > 0) {
+    return (
+      <div className="w-full h-screen flex justify-center items-center bg-yellow-50">
+        <div className="max-w-md bg-white rounded-lg shadow-lg p-8 border border-yellow-300 text-center">
+          <h2 className="text-xl font-bold text-yellow-700 mb-4">Trūksta būtinų failų</h2>
+          <p className="text-gray-800 mb-2">
+            AR vizualizacijai veikiant, būtini šie failai:
+          </p>
+          <ul className="mb-4 text-left text-sm list-disc list-inside text-yellow-800">
+            {missingFiles.map(f => (
+              <li key={f}>{f}</li>
+            ))}
+          </ul>
+          <p className="text-gray-600 text-sm mb-4">
+            Prašome pridėti trūkstamus failus į <code className="bg-gray-100 px-2 rounded">public</code> katalogą.  
+            <br />
+            Po to – perkraukite (deploy) aplikaciją.
+          </p>
+          <a
+            href="https://hiukim.github.io/mind-ar-js-doc/tools/compile"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block bg-yellow-100 border border-yellow-500 text-yellow-800 px-3 py-1 rounded hover:bg-yellow-200 transition"
+          >
+            MindAR .mind generatorius
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-screen bg-black relative">
@@ -129,10 +198,12 @@ const playOnClickComponent = {
   init: function() {
     this.el.addEventListener('click', () => {
       const video = this.el.components.material.material.map.image;
-      if (video.paused) {
-        video.play();
-      } else {
-        video.pause();
+      if (video && typeof video.play === "function" && typeof video.pause === "function") {
+        if (video.paused) {
+          video.play();
+        } else {
+          video.pause();
+        }
       }
     });
   }
